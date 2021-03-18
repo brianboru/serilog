@@ -106,6 +106,33 @@ namespace Serilog.Tests.Core
 #if FEATURE_DEFAULT_INTERFACE
         [InlineData(typeof(DelegatingLogger))]
 #endif
+        public void LoggingLevelContinuesToBeConsideredAfterSuperfluousCheckIsRemoved(Type loggerType)
+        {
+            var events = new List<LogEvent>();
+            var sink = new DelegatingSink(events.Add);
+            var log = CreateLogger(loggerType, lc => lc
+                .MinimumLevel.Is(LogEventLevel.Error)
+                .WriteTo.Sink(sink))
+                .ForContext<LoggerTests>();
+
+            Assert.True(log.IsEnabled(LogEventLevel.Error));
+
+            log.Write(LogEventLevel.Fatal, "Emitted");
+            log.Write(LogEventLevel.Error, "Emitted");
+            log.Write(LogEventLevel.Warning, "Not Emitted");
+            log.Write(LogEventLevel.Information, "Not Emitted");
+            log.Write(LogEventLevel.Debug, "Not Emitted");
+            log.Write(LogEventLevel.Verbose, "Not Emitted");
+            
+            Assert.Equal(2, events.Count);
+            Assert.True(events.All(evt => evt.RenderMessage() == "Emitted"));            
+        }
+
+        [Theory]
+        [InlineData(typeof(Logger))]
+#if FEATURE_DEFAULT_INTERFACE
+        [InlineData(typeof(DelegatingLogger))]
+#endif
         public void MessageTemplatesCanBeBound(Type loggerType)
         {
             var log = CreateLogger(loggerType, lc => lc);

@@ -1,4 +1,4 @@
-﻿// Copyright 2013-2016 Serilog Contributors
+// Copyright 2013-2016 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -195,11 +195,7 @@ namespace Serilog.Core
         [MessageTemplateFormatMethod("messageTemplate")]
         public void Write(LogEventLevel level, string messageTemplate)
         {
-            // Avoid the array allocation and any boxing allocations when the level isn't enabled
-            if (IsEnabled(level))
-            {
-                Write(level, messageTemplate, NoPropertyValues);
-            }
+            Write(level, messageTemplate, NoPropertyValues);            
         }
 
         /// <summary>
